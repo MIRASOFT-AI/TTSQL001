@@ -1,4 +1,7 @@
 import streamlit as st
+import ast
+import pandas as pd
+import altair as alt
 from langchain_community.utilities import SQLDatabase
 from langchain_ollama import ChatOllama
 from langchain_core.prompts import ChatPromptTemplate
@@ -60,7 +63,21 @@ if question:
 
         st.subheader("📈 Result")
         result = db.run(sql_query)
-        st.write(result)
+        
+        try:
+            # Attempt to parse the string result into a list of tuples
+            parsed_result = ast.literal_eval(result)
+            if isinstance(parsed_result, list):
+                if len(parsed_result) > 0:
+                    # Create DataFrame
+                    df = pd.DataFrame(parsed_result)
+                    st.dataframe(df, use_container_width=True)
+                else:
+                    st.info("Query returned no results.")
+            else:
+                st.write(result)
+        except (ValueError, SyntaxError):
+            st.write(result)
 
     except Exception as e:
         st.error(f"❌ Error: {e}")

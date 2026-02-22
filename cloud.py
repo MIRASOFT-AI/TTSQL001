@@ -1,5 +1,8 @@
 import streamlit as st
 import os
+import ast
+import pandas as pd
+import altair as alt
 from dotenv import load_dotenv
 from langchain_community.utilities import SQLDatabase
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -74,7 +77,60 @@ if question:
 
         st.subheader("📈 Result")
         result = db.run(sql_query)
-        st.write(result)
+        
+        try:
+            # Attempt to parse the string result into a list of tuples
+            parsed_result = ast.literal_eval(result)
+            if isinstance(parsed_result, list) and len(parsed_result) > 0:
+                # Create DataFrame
+                df = pd.DataFrame(parsed_result)
+                
+                # --- Visualization Section ---
+                tab1, tab2, tab3 = st.tabs(["📄 Table", "📈 Line Chart", "🥧 Pie Chart"])
+                
+                with tab1:
+                    st.dataframe(df, use_container_width=True)
+                
+                with tab2:
+                    if len(df.columns) >= 2:
+                        # Try to find numeric columns for Y axis
+                        numeric_cols = df.select_dtypes(include=['number']).columns.tolist()
+                        all_cols = df.columns.tolist()
+                        
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            x_axis = st.selectbox("Select X axis:", all_cols, index=0, key="line_x")
+                        with col2:
+                            y_axis = st.selectbox("Select Y axis:", numeric_cols if numeric_cols else all_cols, index=0, key="line_y")
+                        
+                        st.line_chart(df.set_index(x_axis)[y_axis])
+                    else:
+                        st.warning("Not enough columns for a line chart (need at least 2).")
+                
+                with tab3:
+                    if len(df.columns) >= 2:
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            category_col = st.selectbox("Select Category:", df.columns, index=1, key="pie_cat")
+                        with col2:
+                            value_col = st.selectbox("Select Value:", df.select_dtypes(include=['number']).columns if not df.select_dtypes(include=['number']).empty else df.columns, index=0, key="pie_val")
+                        
+                        pie_chart = alt.Chart(df).mark_arc().encode(
+                            theta=alt.Theta(field=value_col, type="quantitative"),
+                            color=alt.Color(field=category_col, type="nominal"),
+                            tooltip=[category_col, value_col]
+                        ).properties(width=400, height=400)
+                        
+                        st.altair_chart(pie_chart, use_container_width=True)
+                    else:
+                        st.warning("Not enough columns for a pie chart.")
+                # --- End Visualization Section ---
+                
+            else:
+                st.write(result)
+        except (ValueError, SyntaxError):
+            # If parsing fails (e.g., result is a single value or message), show as text
+            st.write(result)
 
     except Exception as e:
         st.error(f"❌ Error: {e}")
