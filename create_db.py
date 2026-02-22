@@ -1,4 +1,12 @@
 import sqlite3
+import random
+
+def get_grade(score):
+    if score >= 90: return 'A'
+    if score >= 80: return 'B'
+    if score >= 70: return 'C'
+    if score >= 60: return 'D'
+    return 'F'
 
 # Connect to SQLite database (or create it if it doesn't exist)
 connection = sqlite3.connect("student_grades.db")
@@ -15,31 +23,27 @@ cursor.execute("""
     )
 """)
 
-
-# Insert some dummy data
-data = [
-    (1, "Aman", "Math", 95, "A"),
-    (2, "Anshu", "Math", 78, "C"),
-    (3, "Akshu", "Math", 88, "B"),
-    (4, "Rahul", "Math", 92, "A"),
-    (5, "Divyansh", "Math", 85, "B"),
-    (6, "Nandini", "Math", 65, "D"),
-    (7, "Aman", "Science", 95, "A"),
-    (8, "Anshu", "Science", 78, "C"),
-    (9, "Akshu", "Science", 88, "B"),
-    (10, "Rahul", "Science", 92, "A"),
-    (11, "Divyansh", "Science", 85, "B"),
-    (12, "Nandini", "Science", 65, "D"),
-    (13, "Aman", "History", 95, "A"),
-    (14, "Anshu", "History", 78, "C"),
-    (15, "Akshu", "History", 88, "B"),
-    (16, "Rahul", "History", 92, "A"),
-    (17, "Divyansh", "History", 85, "B"),
-    (18, "Nandini", "History", 65, "D")
+# Base names and subjects
+names = [
+    "Aman", "Anshu", "Akshu", "Rahul", "Divyansh", "Nandini",
+    "Ishita", "Kabir", "Meera", "Rohan", "Sanya", "Vikram",
+    "Zoya", "Arjun", "Priya", "Sahil"
 ]
+subjects = ["Math", "Science", "History", "English", "Geography", "Physics"]
 
-cursor.executemany("INSERT OR IGNORE INTO grades VALUES (?, ?, ?, ?, ?)", data)
+# Generate randomized data
+data = []
+id_counter = 1
+for subject in subjects:
+    for name in names:
+        score = random.randint(50, 100)
+        grade = get_grade(score)
+        data.append((id_counter, name, subject, score, grade))
+        id_counter += 1
+
+# Use REPLACE to update existing rows with new random scores
+cursor.executemany("INSERT OR REPLACE INTO grades VALUES (?, ?, ?, ?, ?)", data)
 connection.commit()
 connection.close()
 
-print("Database created and populated successfully!")
+print("Database created and populated with randomized scores!")
