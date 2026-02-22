@@ -35,7 +35,7 @@ that answers the user's question.
 Rules:
 - Use only the tables and columns in the schema
 - Do NOT explain anything
-- Return ONLY the SQL query to execute directly on the database without any modifications
+- VERY IMPORTANT: Return ONLY the SQL query to execute directly on the database without any modifications
 
 Schema:
 {schema}
