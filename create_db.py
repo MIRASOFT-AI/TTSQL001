@@ -15,6 +15,7 @@ cursor.execute("""
     )
 """)
 
+
 # Insert some dummy data
 data = [
     (1, "Aman", "Math", 95, "A"),
