@@ -12,14 +12,27 @@ def get_grade(score):
 connection = sqlite3.connect("student_grades.db")
 cursor = connection.cursor()
 
-# Create a table
+# Drop existing tables to recreate with new schema
+cursor.execute("DROP TABLE IF EXISTS grades")
+cursor.execute("DROP TABLE IF EXISTS subjects")
+
+# Create subjects table
+cursor.execute("""
+    CREATE TABLE IF NOT EXISTS subjects (
+        id INTEGER PRIMARY KEY,
+        subject_name TEXT UNIQUE
+    )
+""")
+
+# Create grades table (normalized)
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS grades (
         id INTEGER PRIMARY KEY,
-        name TEXT,
-        subject TEXT,
+        student_name TEXT,
+        subject_id INTEGER,
         score INTEGER,
-        grade TEXT
+        grade TEXT,
+        FOREIGN KEY (subject_id) REFERENCES subjects (id)
     )
 """)
 
@@ -29,21 +42,25 @@ names = [
     "Ishita", "Kabir", "Meera", "Rohan", "Sanya", "Vikram",
     "Zoya", "Arjun", "Priya", "Sahil"
 ]
-subjects = ["Math", "Science", "History", "English", "Geography", "Physics"]
+subject_list = ["Math", "Science", "History", "English", "Geography", "Physics"]
 
-# Generate randomized data
+# Insert subjects and keep track of their IDs
+subject_data = [(i+1, name) for i, name in enumerate(subject_list)]
+cursor.executemany("INSERT INTO subjects VALUES (?, ?)", subject_data)
+
+# Generate randomized data for grades
 data = []
 id_counter = 1
-for subject in subjects:
+for subject_id, _ in subject_data:
     for name in names:
         score = random.randint(50, 100)
         grade = get_grade(score)
-        data.append((id_counter, name, subject, score, grade))
+        data.append((id_counter, name, subject_id, score, grade))
         id_counter += 1
 
-# Use REPLACE to update existing rows with new random scores
-cursor.executemany("INSERT OR REPLACE INTO grades VALUES (?, ?, ?, ?, ?)", data)
+# Insert randomized grades
+cursor.executemany("INSERT INTO grades VALUES (?, ?, ?, ?, ?)", data)
 connection.commit()
 connection.close()
 
-print("Database created and populated with randomized scores!")
+print("Database created and populated with normalized tables!")
