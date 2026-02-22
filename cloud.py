@@ -18,7 +18,7 @@ llm = ChatGoogleGenerativeAI(
     model="gemini-3-flash-preview",
     google_api_key=api_key,
     temperature=0,
-    convert_system_message_to_human=False
+    convert_system_message_to_human=True
 )
 
 # Prompt (LCEL Style)
@@ -31,7 +31,7 @@ that answers the user's question.
 Rules:
 - Use only the tables and columns in the schema
 - Do NOT explain anything
-- Return ONLY the SQL query to execute directly on the database
+- Return ONLY the SQL query to execute directly on the database without any modifications
 
 Schema:
 {schema}
