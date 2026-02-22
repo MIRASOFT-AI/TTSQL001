@@ -1,8 +1,14 @@
 import streamlit as st
+import os
+from dotenv import load_dotenv
 from langchain_community.utilities import SQLDatabase
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
+
+# Load environment variables
+load_dotenv()
+api_key = os.getenv("GOOGLE_API_KEY")
 
 # Database Connection
 db = SQLDatabase.from_uri("sqlite:///student_grades.db")
@@ -10,6 +16,7 @@ db = SQLDatabase.from_uri("sqlite:///student_grades.db")
 # Cloud LLM (Google Gemini)
 llm = ChatGoogleGenerativeAI(
     model="gemini-3-flash-preview",
+    google_api_key=api_key,
     temperature=0,
     convert_system_message_to_human=False
 )
