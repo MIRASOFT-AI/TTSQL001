@@ -1,16 +1,17 @@
 import streamlit as st
 from langchain_community.utilities import SQLDatabase
-from langchain_ollama import ChatOllama
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
 # Database Connection
 db = SQLDatabase.from_uri("sqlite:///student_grades.db")
 
-# Local LLM (Ollama)
-llm = ChatOllama(
-    model="llama3",
-    temperature=0
+# Cloud LLM (Google Gemini)
+llm = ChatGoogleGenerativeAI(
+    model="gemini-3-flash-preview",
+    temperature=0,
+    convert_system_message_to_human=False
 )
 
 # Prompt (LCEL Style)
@@ -23,7 +24,7 @@ that answers the user's question.
 Rules:
 - Use only the tables and columns in the schema
 - Do NOT explain anything
-- Return ONLY the SQL query
+- Return ONLY the SQL query to execute directly on the database
 
 Schema:
 {schema}
@@ -41,6 +42,11 @@ sql_chain = (
 
 schema = db.get_table_info()
 
+# Page Setup
+st.set_page_config(page_title="Text-to-SQL App", layout="centered")
+st.title("📊 Talk to Your Database")
+st.write("Ask questions about the student grades database in plain English.")
+
 
 # UI Input
 question = st.text_input(
@@ -55,6 +61,7 @@ if question:
             {"schema": schema, "question": question}
         ).strip()
 
+        print(f"Generated SQL: {sql_query}")
         st.subheader("🧠 Generated SQL")
         st.code(sql_query, language="sql")
 
@@ -67,4 +74,4 @@ if question:
 
 # Footer
 st.markdown("---")
-st.caption("Powered by LangChain 1.x • Ollama • Llama 3 • Streamlit")
+st.caption("Powered by LangChain 1.x • Google Gemini • Streamlit")
