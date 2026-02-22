@@ -7,8 +7,8 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
 # Load environment variables
-load_dotenv()
-api_key = os.getenv("GOOGLE_API_KEY")
+load_dotenv() # This loads local .env files if they exist
+api_key = os.getenv("GOOGLE_API_KEY") # This reads from the system environment
 
 # Database Connection
 db = SQLDatabase.from_uri("sqlite:///student_grades.db")
