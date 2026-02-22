@@ -54,8 +54,8 @@ sql_chain = (
 schema = db.get_table_info()
 
 # Page Setup
-st.set_page_config(page_title="Text-to-SQL App", layout="centered")
-st.title("📊 Talk to Your Database")
+st.set_page_config(page_title="Text-to-SQL App", layout="wide")
+st.title("📊 Talk to Your Database (Remote)")
 st.write("Ask questions about the student grades database in plain English.")
 
 

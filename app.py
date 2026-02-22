@@ -45,6 +45,10 @@ sql_chain = (
 
 schema = db.get_table_info()
 
+# Page Setup
+st.set_page_config(page_title="Text-to-SQL App (Local)", layout="wide")
+st.title("📊 Talk to Your Database (Local)")
+st.write("Ask questions about the student grades database in plain English.")
 
 # UI Input
 question = st.text_input(
@@ -109,7 +113,7 @@ if question:
                         tooltip=all_cols
                     ).properties(width=400, height=400)
                     
-                    st.altair_chart(pie_chart, width=True)
+                    st.altair_chart(pie_chart, use_container_width=True)
                 else:
                     st.warning("Not enough columns for a pie chart.")
             # --- End Visualization Section ---
